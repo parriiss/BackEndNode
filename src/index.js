@@ -1,14 +1,17 @@
-"use strict"
+'use strict'
 
-const express = require('express')
-const pads = require('./model/pad_info')
-const app = express()
+const model_pad = require('./model/pad_info');
+const express = require('express');
+const app = express();
 
-// uncomment if you wan
-// var pad = pads.Pad_info("ID" , "THIS IS VALUE" , "MYPAD");
-// console.log("This is a new pad, id: "+ pad.id )
+app.get('/', (req , res) => {
+    var ip = req.header('x-forwarded-for') ||
+		req.connection.remoteAddress;
+	console.log('IP:%s arrived at homepage!!!' , ip);
+	res.send('<h1>Hello there welcome to my page</h1>');
+});
 
 
 
-
-const server = app.listen(8080, () => console.log('Listennig to port 8080...'));
+const port = process.env.port || 8000;
+const server = app.listen(port, () => console.log('Listennig to port:'+port));
