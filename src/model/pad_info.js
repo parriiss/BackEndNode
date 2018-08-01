@@ -6,6 +6,8 @@ module.exports = {
         this.value = value;
         this.start = start;
         this.end = end;
+       
+        return this
     },
 
     Pad_info: (id, value, name) =>{
@@ -15,22 +17,22 @@ module.exports = {
         this.Needs_flushing = false;
         this.Updates = [];
 
-        Add_update = (val , st , en) => {
+        this.Add_update = (val , st , en) => {
             this.Updates.push(Pad_update(val, st , en));
         }
 
-        Rmv_updates = () => {  this.Updates = []   }
+        this.Rmv_updates = () => {  this.Updates = []   }
 
         /* Get contents of this pad from pad 
         the file that it's referencing */
-        Get_Contents= ()=>{
+        this.Get_Contents= ()=>{
             // Read file
             // save contents of file in value
         }
 
         /*  Update the contents of the file
             that pad is refering to    */
-        Update_file = ()=>{
+        this.Update_file = ()=>{
             // check if pad needs flushing
             if (this.Needs_flushing){
                 // get find the right file
@@ -40,6 +42,7 @@ module.exports = {
             }
         }
 
+        return this
     }
 
 }
