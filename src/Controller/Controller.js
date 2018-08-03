@@ -118,7 +118,7 @@ function insert_pad_id_toDB(db, id, name, ip) {
 function RenameFile(req, res) {
 	//var json_obj = JSON.parse(req.body);
 	//res.status(200);
-	console.log("AAAAAAAAAAA");
+	//console.log("AAAAAAAAAAA");
 	//console.log(json_obj.id);
 }
 //TODO DeleteFile
