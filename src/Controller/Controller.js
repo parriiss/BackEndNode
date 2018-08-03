@@ -1,7 +1,12 @@
 "use strict"
 const mysql = require('mysql');
+const express = require('express')
 const RandExp = require('randexp');
 var bodyParser = require('body-parser');
+const model_pad = require('../model/pad_info');
+var fs = require('fs');
+const app = express();
+app.use(express.json());
 
 //Map that contains the active Pads
 var PadMap = new Map();
@@ -32,31 +37,46 @@ function LoadPad(req, res) {
 }
 
 
-//TODO CreateNewPad
-function CreateNewPad(req, res) {
+/*
+Creating a new Pad and add it in the PadMap and in the DataBase
+Response <----- JSON with id,name,value,NeedFlush,Update
+Status Codes: 200(OK) , 400(BadRequest) , 500(Internal Server Error)
+*/function CreateNewPad(req, res) {
 	res.setHeader('Content-Type', 'application/json');
 	var s = "NewPad";
 
 	//INSERT IN PAD MAP
-
-	var new_id = this.generate_pad_id();
+	var new_id = generate_pad_id();
 	if (new_id === null) {
 		res.status(500);
 		return;
 	}
+	var path="./SavedFiles/"+new_id+".txt";
 
 
-	var obj = new_pad_info(new_id, "", s);
+	var obj = model_pad.Pad_info(new_id, "", s);
 	if (obj === null) {
-		res.status(500);
+		res.status(400);
 		return;
 	}
-	PadMap.set(obj);
-
-	var db = this.Database_Connect();
+	PadMap.set(new_id, obj);
+	fs.open(path, 'w', function (err, file) {
+		if (err) {
+			PadMap.delete(new_id);
+			res.status(500);
+			return;
+		}
+		console.log('Saved!');
+	});
+	var db = Database_Connect();
 	var ip = req.connection.remoteAddress;
-	var result = this.insert_pad_id_toDB(db, new_id, s, ip);
+	var result = insert_pad_id_toDB(db, new_id, s, ip);
 	if (result === null) {
+		PadMap.delete(new_id);
+		fs.unlink(path, function (err) {
+			if (err) {res.status(500);return;}
+			console.log('File deleted!');
+		  }); 
 		res.status(500);
 		return;
 	}
@@ -66,9 +86,9 @@ function CreateNewPad(req, res) {
 	//SEND RESPONSE JSON
 
 
-
+	console.log(PadMap.get(new_id).name);
 	res.status(200);
-	res.send(JSON.stringify({ id: new_id, name: s }));
+	res.send(JSON.stringify(obj));
 
 
 }
@@ -84,6 +104,7 @@ function generate_pad_id() {
 				found = 1;
 			}
 		});
+		console.log('hey');
 		if (!found)
 			break;
 
@@ -100,7 +121,6 @@ function insert_pad_id_toDB(db, id, name, ip) {
 	var sql_insert = "INSERT INTO filesMetaData SET id=? , name=?";
 	var query = db.query(sql_insert, [id, name], function (err, result) {
 		if (err) {
-			throw err;
 			return;
 		}
 		console.log("Number of records inserted: " + result.affectedRows);
@@ -108,18 +128,48 @@ function insert_pad_id_toDB(db, id, name, ip) {
 	sql_insert = "INSERT INTO historyFiles SET ip=?, id=?, time=?, state=?";
 	var query = db.query(sql_insert, [ip, id, date, 1], function (err, result) {
 		if (err) {
-			throw err;
 			return;
 		}
 		console.log("Number of records inserted: " + result.affectedRows);
 	});
 }
-//TODO RenameFile
+/*
+Rename A File in the database and in the PadMap
+Request <----- NewName from the client
+Response <----- JSON with id,NewName,value,NeedFlush,Update
+Status Codes: 200(OK) , 404(Pad Not Found) , 500(Internal Server Error)
+*/
 function RenameFile(req, res) {
-	//var json_obj = JSON.parse(req.body);
-	//res.status(200);
-	console.log("AAAAAAAAAAA");
-	//console.log(json_obj.id);
+	var db = Database_Connect();
+	res.setHeader('Content-Type', 'application/json');
+	var pad_obj = PadMap.get(req.body.id);
+	var result;
+	if (pad_obj === undefined) {
+		console.log("Pad not found");
+		res.status(404);
+		return;
+	}
+	PadMap.get(req.body.id).name = req.body.name;
+	var json_ret = PadMap.get(req.body.id);
+	result = update_filename_at_DB(db, req.body.id, req.body.name);
+	if (result === null) {
+		result.status(500);
+		return;
+	}
+	res.status(200);
+	res.send(JSON.stringify(json_ret));
+
+}
+
+function update_filename_at_DB(db, padId, newName) {
+	console.log(padId, newName);
+	var sql_insert = "UPDATE filesMetaData SET name=? WHERE id=?";
+	var query = db.query(sql_insert, [newName, padId], function (err, result) {
+		if (err) {
+			return null;
+		}
+		console.log("Number  records inserted: " + result.affectedRows);
+	});
 }
 //TODO DeleteFile
 function DeleteFile(req, res) {
@@ -149,9 +199,9 @@ function GetPadHistory(req, res) {
 
 
 module.exports = {
-    
-   NewPad: CreateNewPad,
-   RenamePad:RenameFile
+
+	NewPad: CreateNewPad,
+	RenamePad: RenameFile
 
 
 }
