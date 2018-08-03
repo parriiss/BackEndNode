@@ -7,7 +7,7 @@ const app = express();
 var bodyParser = require('body-parser');
 
 app.use(bodyParser.json);
-app.post('/RenameFile', (req, res) => pad.RenameFile(req,res));
+app.post('/RenameFile', (req, res) => Con.RenamePad(req,res));
 
 //app.get('/RenameFile',Con.RenameFile);
 /*
