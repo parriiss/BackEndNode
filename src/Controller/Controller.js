@@ -39,7 +39,7 @@ function CreateNewPad(req, res) {
 
 	//INSERT IN PAD MAP
 
-	var new_id = this.generate_pad_id();
+	var new_id = generate_pad_id();
 	if (new_id === null) {
 		res.status(500);
 		return;
@@ -53,9 +53,9 @@ function CreateNewPad(req, res) {
 	}
 	PadMap.set(obj);
 
-	var db = this.Database_Connect();
+	var db = Database_Connect();
 	var ip = req.connection.remoteAddress;
-	var result = this.insert_pad_id_toDB(db, new_id, s, ip);
+	var result = insert_pad_id_toDB(db, new_id, s, ip);
 	if (result === null) {
 		res.status(500);
 		return;
