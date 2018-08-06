@@ -43,9 +43,9 @@ function new_pad_upd(value, start ,end ){
  */
 function new_pad_info(id, value, name){
     //  check values of
-    if( !val_Ok(id , 'string', 'Id of pad_info is not string') ){ return }
-    else if( !val_Ok(value, 'string' , 'Value of pad_info is not string') ){ return }
-    else if( !val_Ok(name , 'string' , 'Name of pad_info is not a string')){ return } 
+    if( !er_check.val_ok(id , 'string', 'Id of pad_info is not string') ){ return }
+    else if( !er_check.val_ok(value, 'string' , 'Value of pad_info is not string') ){ return }
+    else if( !er_check.val_ok(name , 'string' , 'Name of pad_info is not a string')){ return } 
 
     var Needs_flushing = false;
     var Updates = [];
