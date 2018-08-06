@@ -110,8 +110,6 @@ function CreateNewPad(req, res) {
 	console.log(PadMap.get(new_id).name);
 	res.status(200);
 	res.send(JSON.stringify(obj));
-
-
 }
 
 
@@ -137,6 +135,8 @@ function generate_pad_id() {
 function insert_pad_id_toDB(db, id, name, ip) {
 	var date = new Date();
 	console.log(date);
+	
+	//insert new pad info to pads database 
 	var sql_insert = "INSERT INTO filesMetaData SET id=? , name=?";
 	var query = db.query(sql_insert, [id, name], function (err, result) {
 		if (err) {
@@ -144,6 +144,8 @@ function insert_pad_id_toDB(db, id, name, ip) {
 		}
 		console.log("Number of records inserted: " + result.affectedRows);
 	});
+
+	// insert into history new date for session start
 	sql_insert = "INSERT INTO historyFiles SET ip=?, id=?, time=?, state=?";
 	var query = db.query(sql_insert, [ip, id, date, 1], function (err, result) {
 		if (err) {
