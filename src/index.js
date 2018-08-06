@@ -1,8 +1,12 @@
 'use strict'
 
-const model_pad = require('./model/pad_info');
 const express = require('express');
+const control = require('./Controller/control');
 const app = express();
+const config = require('./config.json')
+
+
+app.use(express.json());
 
 app.get('/', (req , res) => {
     var ip = req.header('x-forwarded-for') ||
@@ -11,7 +15,9 @@ app.get('/', (req , res) => {
 	res.send('<h1>Hello there welcome to my page</h1>');
 });
 
+app.get('/About', control.About);
+app.put('/Edit', control.Edit);
 
-
-const port = process.env.port || 8000;
-const server = app.listen(port, () => console.log('Listennig to port:'+port));
+const server = app.listen(config.ListeningPort , function(){
+	console.log('Listening to port:'+config.ListeningPort+'...');
+});

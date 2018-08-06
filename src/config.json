@@ -1,0 +1,8 @@
+{
+    "Database" : {
+        "user" : "root",
+        "pass" : "d3ns0ul3w"
+    },
+
+    "ListeningPort": 8080
+}
