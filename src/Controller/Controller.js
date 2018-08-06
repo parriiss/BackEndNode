@@ -2,7 +2,6 @@
 const mysql = require('mysql');
 const express = require('express')
 const RandExp = require('randexp');
-var bodyParser = require('body-parser');
 const model_pad = require('../model/pad_info');
 var fs = require('fs');
 const app = express();
@@ -14,6 +13,8 @@ var PadMap = new Map();
 /*
 Connexting to the DataBase and returnin the connection
 */
+
+//NEED TO READ FROM CONFIG FILE FOR THE DATABASE
 function Database_Connect() {
 	var con = mysql.createConnection({
 		host: "127.0.0.1",
@@ -28,6 +29,7 @@ function Database_Connect() {
 	});
 	console.log(PadMap.size);
 	return con;
+
 }
 
 
@@ -51,8 +53,11 @@ Status Codes: 200(OK) , 400(BadRequest) , 500(Internal Server Error)
 		res.status(500);
 		return;
 	}
-	var path="./SavedFiles/"+new_id+".txt";
 
+	var file_path = "./SavedFiles/" + new_id + ".txt";
+	if (!fs.existsSync("./SavedFiles/")) {
+		fs.mkdirSync("./SavedFiles/");
+	}
 
 	var obj = model_pad.Pad_info(new_id, "", s);
 	if (obj === null) {
@@ -60,7 +65,7 @@ Status Codes: 200(OK) , 400(BadRequest) , 500(Internal Server Error)
 		return;
 	}
 	PadMap.set(new_id, obj);
-	fs.open(path, 'w', function (err, file) {
+	fs.open(file_path, 'w', function (err, file) {
 		if (err) {
 			PadMap.delete(new_id);
 			res.status(500);
@@ -73,19 +78,15 @@ Status Codes: 200(OK) , 400(BadRequest) , 500(Internal Server Error)
 	var result = insert_pad_id_toDB(db, new_id, s, ip);
 	if (result === null) {
 		PadMap.delete(new_id);
-		fs.unlink(path, function (err) {
-			if (err) {res.status(500);return;}
+		fs.unlink(fie_path, function (err) {
+			if (err) { res.status(500); return; }
 			console.log('File deleted!');
-		  }); 
+		});
 		res.status(500);
 		return;
 	}
 
-	//LOGGEINUSERS IP's
-
-	//SEND RESPONSE JSON
-
-
+	//LOGGEDINUSERS IP's
 	console.log(PadMap.get(new_id).name);
 	res.status(200);
 	res.send(JSON.stringify(obj));
@@ -96,21 +97,17 @@ Status Codes: 200(OK) , 400(BadRequest) , 500(Internal Server Error)
 Generating NewId for every new Pad that is creating
 */
 function generate_pad_id() {
-	var found = 0;
+
 	while (true) {
 		var reg = new RandExp('[a-f0-9]{16}').gen();
-		PadMap.forEach(function (value, key) {
-			if (key == reg) {
-				found = 1;
-			}
-		});
-		console.log('hey');
-		if (!found)
-			break;
+		var ret = PadMap.get(reg);
+
+		if (ret == undefined) {
+			return reg;
+		}
 
 
 	}
-	return reg;
 }
 /*
 Inserting newPad in DataBase
@@ -132,6 +129,7 @@ function insert_pad_id_toDB(db, id, name, ip) {
 		}
 		console.log("Number of records inserted: " + result.affectedRows);
 	});
+	db.end();
 }
 /*
 Rename A File in the database and in the PadMap
