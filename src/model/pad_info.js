@@ -43,9 +43,15 @@ function new_pad_upd(value, start ,end ){
  */
 function new_pad_info(id, value, name){
     //  check values of
+<<<<<<< HEAD
     if( !val_ok(id , 'string', 'Id of pad_info is not string') ){ return }
     else if( !val_ok(value, 'string' , 'Value of pad_info is not string') ){ return }
     else if( !val_ok(name , 'string' , 'Name of pad_info is not a string')){ return } 
+=======
+    if( !er_check.val_ok(id , 'string', 'Id of pad_info is not string') ){ return }
+    else if( !er_check.val_ok(value, 'string' , 'Value of pad_info is not string') ){ return }
+    else if( !er_check.val_ok(name , 'string' , 'Name of pad_info is not a string')){ return } 
+>>>>>>> cb10919870907a5bf52e89d2c3fe747414c24f73
 
     var Needs_flushing = false;
     var Updates = [];

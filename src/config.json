@@ -1,5 +1,6 @@
 {
     "Database" : {
+        "name" : "onlineEditor",
         "user" : "root",
         "pass" : "d3ns0ul3w"
     },
