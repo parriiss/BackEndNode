@@ -2,7 +2,7 @@
     "Database" : {
         "name" : "onlineEditor",
         "user" : "root",
-        "pass" : "d3ns0ul3w"
+        "pass" : "root"
     },
 
     "ListeningPort": 8080
