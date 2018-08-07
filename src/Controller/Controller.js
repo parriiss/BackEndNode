@@ -1,9 +1,9 @@
 "use strict"
 
 const mysql = require('mysql');
-const util = require('util');
 const RandExp = require('randexp');
 const model_pad = require('../model/pad_info');
+const model_request = require('../model/request_info');
 const config = require('../config.json')
 
 /*
@@ -17,9 +17,11 @@ const config = require('../config.json')
 	app.use(express.json());
 */
 
+
+// Array containing arrived requests
+var Requests = [];
 // Map that contains the active Pads
 var PadMap = new Map();
-var Requests = [];
 
 /*
 	Connecting to the DataBase and returnin the connection
@@ -27,7 +29,7 @@ var Requests = [];
 //NEED TO READ FROM CONFIG FILE FOR THE DATABASE
 function Database_Connect() {
 	var con = mysql.createConnection({
-		host: "127.0.0.1",
+		host: config.Database.address,
 		user: config.Database.user,
 		password: config.Database.pass,
 		database: config.Database.name
@@ -246,26 +248,54 @@ function About(req , res){
  * pad 
  */
 function Edit(req , res){
-    console.log(req.body);
+	res.setHeader('Content-Type' , 'application/json');
+
     var saved = model_request.new_req(req.body.Pad_ID , 
-        req.body.Value,
-        req.body.Start,
-        req.body.End,
-        req.body.Req_date,
-        req.body.is_update);
+					req.body.Value,
+					req.body.Start,
+					req.body.End,
+					new Date(req.body.Req_Date*1000),
+					req.body.Is_update_request);
     
     if (saved === null){
         res.status(400).send();
-        return
+        return;
     } 
 
-    console.log('Received:\n\t'+util.inspect(req.body));
-    console.log('Saved: '+util.inspect(saved));
-
-    res.status(202);
-    res.send();
+	
+	res.status(202);
+	res.send();
 }
 
+/**
+ * Starts the function that checks for saved
+ * requests and makes the according update
+ */
+function StartServing(){
+	const serve = () => {
+		// possible need for sorting here
+
+		for (var v of Requests){
+			var pad = PadMap[v.pad_id];
+			if(pad != null){
+				if ( !pad.Do_update(v.value,v.start , v.end) ){
+					// possible error handling
+				}
+
+				// TODO Remove element from the array
+			}else{
+				console.trace('Unable to find pad:'+v.pad_id);
+				
+				// possible error handling
+
+			}
+
+		} 
+	};
+
+	// star serving requests every 4s
+	setInterval(serve , 4000);
+};
 
 module.exports = {
 

@@ -23,16 +23,16 @@ function Req_info(pad_id , value , start, end, date , Is_update_request){
     }else if( !check.val_ok(start, 'number', 'Invalid start for request')){
 
     }
-    var new_Date = new Date(date);
-    if(new_Date === null){
+    if(date === null){
         console.trace('Invalid date of request');
         return;
     }
 
-    return {pad_id , value , start, end , new_Date , Is_update_request};
+    return {pad_id , value , start, end , date , Is_update_request};
 }
 
 
 module.exports = {
-    new_req : Req_info
+    new_req     : Req_info,
+    Requests    : Requests
 };

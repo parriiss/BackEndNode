@@ -1,8 +1,9 @@
 {
     "Database" : {
-        "name" : "onlineEditor",
-        "user" : "root",
-        "pass" : "d3ns0ul3w"
+        "address"   : "127.0.0.1",
+        "name"      : "onlineEditor",
+        "user"      : "root",
+        "pass"      : "d3ns0ul3w"
     },
 
     "ListeningPort": 8080
