@@ -1,13 +1,28 @@
-"use strict";
-const  control = require('./Controller/Controller');
-const model_pad = require('./model/pad_info');
-const http = require('http');
-var express = require('express');
-var app = express();
+'use strict'
+
+const control = require('./Controller/Controller');
+const express = require('express');
+const app = express();
+const config = require('./config.json')
+
+
 app.use(express.json());
+
+// for testing only
+app.get('/', (req , res) => {
+    var ip = req.header('x-forwarded-for') ||
+		req.connection.remoteAddress;
+	console.log('IP:%s arrived at homepage!!!' , ip);
+	res.send('<h1>Hello there welcome to my page</h1>');
+});
+
+app.get('/About', control.About);
+
+app.put('/Edit', control.Edit);
+
 app.post('/CreateNewPad', control.NewPad);
 app.post('/RenameFile', control.RenamePad);
-var port = process.env.PORT || 5000;
-app.listen(port, function() {
-  console.log("Listening on " + port);
+
+const server = app.listen(config.ListeningPort , function(){
+	console.log('Listening to port:'+config.ListeningPort+'...');
 });

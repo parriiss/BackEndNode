@@ -33,9 +33,9 @@ function new_pad_upd(value, start ,end ){
 
 /**
  * 
- * @param {string} id       The id of the newpad
+ * @param {string} id       The id of the newpad NOT NULL 
  * @param {string} value    The contents of the pad
- * @param {string} name     The name of the pad
+ * @param {string} name     The name of the pad NOT NULL
  * 
  * @returns {object} 
  * An object that represents a pad that is editted.
@@ -43,6 +43,7 @@ function new_pad_upd(value, start ,end ){
  */
 function new_pad_info(id, value, name){
     //  check values of
+
     if( !er_check.val_ok(id , 'string', 'Id of pad_info is not string') ){ return }
     else if( !er_check.val_ok(value, 'string' , 'Value of pad_info is not string') ){ return }
     else if( !er_check.val_ok(name , 'string' , 'Name of pad_info is not a string')){ return } 
