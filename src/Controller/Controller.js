@@ -25,7 +25,6 @@ var Requests = [];
 /*
 	Connecting to the DataBase and returnin the connection
 */
-//NEED TO READ FROM CONFIG FILE FOR THE DATABASE
 function Database_Connect() {
 	var con = mysql.createConnection({
 		host: "127.0.0.1",
@@ -227,7 +226,7 @@ function update_filename_at_DB(db, padId, newName) {
 
 /**
  * Delete a file from DB,locally and the map
- * 		200(OK) / 404(Pad Not Found) / 500(Internal Server Error)
+ * 200(OK) / 404(Pad Not Found) / 500(Internal Server Error)
  * @param {http request} req 
  * @param {http request} res 
  */function DeleteFile(req, res) {
@@ -270,6 +269,7 @@ var	result = CreateBackupFile(originalPath, recPath);
 		return;
 	}
 	result = deletePadFromDB(db, pad_obj.id);
+	db.end();
 	if (result === null) {
 		fs.rename(recPath, originalPath, (err) => {
 			if (err) {
@@ -334,7 +334,7 @@ function deletePadFromDB(db, pid) {
 
 }
 /**
- * 
+ * Status Codes 404(File not Found in Map)/200 Status ok
  * @param {http request} req 
  * @param {http request} res 
  */
