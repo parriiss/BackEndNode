@@ -4,7 +4,8 @@ const mysql = require('mysql');
 const util = require('util');
 const RandExp = require('randexp');
 const model_pad = require('../model/pad_info');
-const config = require('../config.json')
+const config = require('../config.json');
+var fs = require('fs');
 
 /*
 	***IMPORTANT***
@@ -34,7 +35,7 @@ function Database_Connect() {
 	});
 
 	con.connect(function (err) {
-		if (err) throw err;
+		if (err) return null;
 		console.log("Connected to DB!");
 	});
 	console.log(PadMap.size);
@@ -94,8 +95,13 @@ function CreateNewPad(req, res) {
 	});
 
 	var db = Database_Connect();
+	if(db === null){
+		res.status(500);
+		return;
+	} 
 	var ip = req.connection.remoteAddress;
 	var result = insert_pad_id_toDB(db, new_id, s, ip);
+	db.end();
 	if (result === null) {
 		PadMap.delete(new_id);
 		fs.unlink(fie_path, function (err) {
@@ -115,6 +121,7 @@ function CreateNewPad(req, res) {
 
 /**
  * Generating NewId for every new Pad that is creating	 
+ * @returns {string} Returns the id that it has been generated
  */
 function generate_pad_id() {
 
@@ -131,6 +138,10 @@ function generate_pad_id() {
 }
 /**
  *Inserting newPad in DataBase
+@param {mysqlConnection} db
+@param {string} id
+@param {string} name
+@param {string} ip
  */
 function insert_pad_id_toDB(db, id, name, ip) {
 	var date = new Date();
@@ -153,7 +164,6 @@ function insert_pad_id_toDB(db, id, name, ip) {
 		}
 		console.log("Number of records inserted: " + result.affectedRows);
 	});
-	db.end();
 }
 
 
@@ -182,6 +192,7 @@ function RenameFile(req, res) {
 	var db = Database_Connect();	
 	// REMEMBER TO CLOSE CONNECTION TO DATABASE!!!!
 	result = update_filename_at_DB(db, req.body.id, req.body.name);
+	db.end();
 	
 	if (result === null) {
 		result.status(500);
@@ -199,7 +210,7 @@ function RenameFile(req, res) {
  * @param {string} padId 	String of the id of the pad to be editted
  * @param {string} newName 	String of the new name for pad  
  * 
- * @returns ????????????
+ * @returns null on Error/newName on success
  */
 function update_filename_at_DB(db, padId, newName) {
 	console.log(padId, newName);
@@ -211,10 +222,14 @@ function update_filename_at_DB(db, padId, newName) {
 
 		console.log("Number records inserted: " + result.affectedRows);
 	});
+	return newName;
 }
 
-//TODO DeleteFile
-function DeleteFile(req, res) {}
+/**
+ * 
+ * @param {http request} req 
+ * @param {http request} res 
+ */function DeleteFile(req, res) {}
 
 /**
  * 
