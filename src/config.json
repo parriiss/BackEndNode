@@ -6,5 +6,6 @@
         "pass"      : "d3ns0ul3w"
     },
 
-    "ListeningPort": 8080
+    "FilesDir" : "./SavedFiles/",
+    "ListeningPort" : 8080
 }
