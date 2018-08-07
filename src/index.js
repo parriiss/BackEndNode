@@ -21,7 +21,10 @@ app.get('/About', control.About);
 app.put('/Edit', control.Edit);
 
 app.post('/CreateNewPad', control.NewPad);
-app.post('/RenameFile'	, control.RenamePad);
+app.post('/RenameFile', control.RenamePad);
+app.post('/EmptyPad',control.EmptyPad);
+
+app.delete('/DeleteFile',control.DeletePad);
 
 const server = app.listen(config.ListeningPort , function(){
 	console.log('Listening to port:'+config.ListeningPort+'...');
