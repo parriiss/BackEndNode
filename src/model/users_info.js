@@ -27,7 +27,7 @@ const add_user = (pad , ip)=>{
     }else{
         LoggedInUsers[pad].push(ip);
     }
-}
+};
 
 /**
  * 
@@ -48,7 +48,7 @@ const remove_users = (users)=>{
             }
         }
     }
-}
+};
 
 /**
  * 
@@ -68,9 +68,9 @@ const remove_user_fromPad=(pad, ip)=>{
     }   
 }
 
-module.export = {
+module.exports = {
     Users : LoggedInUsers,
     AddUser : add_user,
     RemoveUsers : remove_users,
     RemoveUsers_fromPad : remove_user_fromPad 
-}
+};

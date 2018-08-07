@@ -4,6 +4,7 @@ const mysql = require('mysql');
 const util = require('util');
 const RandExp = require('randexp');
 const model_pad = require('../model/pad_info');
+const user = require('../model/users_info');
 const config = require('../config.json');
 var fs = require('fs');
 
@@ -112,6 +113,7 @@ function CreateNewPad(req, res) {
 	}
 
 	//LOGGEDINUSERS IP's
+	user.AddUser(new_id,ip);
 	console.log(PadMap.get(new_id).name);
 	res.status(200);
 	res.send(JSON.stringify(obj));
