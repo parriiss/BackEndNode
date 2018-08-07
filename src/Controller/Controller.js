@@ -339,7 +339,15 @@ function deletePadFromDB(db, pid) {
  * @param {http request} res 
  */
 function EmptyDocument(req, res) {
-
+	var pad_obj = PadMap.get(req.body.id);
+	if (pad_obj === undefined) {
+		console.log("Pad not found");
+		res.status(404).send();
+		return;
+	}
+	var originalPath = "./SavedFiles/" + pad_obj.id + ".txt";
+	fs.truncate(originalPath, 0, function(){console.log('Truncation of the file <'+originalPath+'> done')})
+	res.status(200).send();
 }
 
 /**
@@ -389,6 +397,7 @@ module.exports = {
 	NewPad: CreateNewPad,
 	RenamePad: RenameFile,
 	DeletePad: DeleteFile,
+	EmptyPad: EmptyDocument,
 	About: About,
 	Edit: Edit
 
