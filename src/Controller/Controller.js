@@ -1,9 +1,10 @@
 "use strict"
 
 const mysql = require('mysql');
-const util = require('util');
 const RandExp = require('randexp');
 const model_pad = require('../model/pad_info');
+const model_request = require('../model/request_info');
+const config = require('../config.json')
 const user = require('../model/users_info');
 const config = require('../config.json');
 var fs = require('fs');
@@ -19,16 +20,18 @@ var fs = require('fs');
 	app.use(express.json());
 */
 
+
+// Array containing arrived requests
+var Requests = [];
 // Map that contains the active Pads
 var PadMap = new Map();
-var Requests = [];
 
 /*
 	Connecting to the DataBase and returnin the connection
 */
 function Database_Connect() {
 	var con = mysql.createConnection({
-		host: "127.0.0.1",
+		host: config.Database.address,
 		user: config.Database.user,
 		password: config.Database.pass,
 		database: config.Database.name
@@ -69,9 +72,9 @@ function CreateNewPad(req, res) {
 		return;
 	}
 
-	var file_path = "./SavedFiles/" + new_id + ".txt";
-	if (!fs.existsSync("./SavedFiles/")) {
-		fs.mkdirSync("./SavedFiles/");
+	var file_path = config.FilesDir + new_id + ".txt";
+	if (!fs.existsSync(config.FilesDir)) {
+		fs.mkdirSync(config.FilesDir);
 	}
 
 	var obj = model_pad.Pad_info(new_id, "", s);
@@ -235,7 +238,8 @@ function update_filename_at_DB(db, padId, newName) {
 		return;
 	}
 	var recPath = "./" + pad_obj.id + "-Backup" + ".txt";
-	var originalPath = "./SavedFiles/" + pad_obj.id + ".txt";
+
+	var originalPath = config.FilesDir + pad_obj.id + ".txt";
 	var result = CreateBackupFile(originalPath, recPath);
 	if (result === null) {
 		res.status(500).send();
@@ -309,8 +313,9 @@ function CreateBackupFile(originalPath, recPath) {
 }
 /**
  * @param {mysqlConnection} db
- * @param {string} pid Id of the Pad
- * @returns null on error/Empty string on success
+ * @param {string} 			pid Id of the Pad
+ *
+ *  @returns null on error/Empty string on success
  */
 
 function deletePadFromDB(db, pid) {
@@ -332,9 +337,11 @@ function deletePadFromDB(db, pid) {
 
 }
 /**
- * Status Codes 404(File not Found in Map)/200 Status ok
+ * 
  * @param {http request} req 
  * @param {http request} res 
+ * 
+ * Status Codes 404(File not Found in Map)/200 Status ok
  */
 function EmptyDocument(req, res) {
 	var pad_obj = PadMap.get(req.body.id);
@@ -343,7 +350,7 @@ function EmptyDocument(req, res) {
 		res.status(404).send();
 		return;
 	}
-	var originalPath = "./SavedFiles/" + pad_obj.id + ".txt";
+	var originalPath = config.FilesDir + pad_obj.id + ".txt";
 	fs.truncate(originalPath, 0, function () { console.log('Truncation of the file <' + originalPath + '> done') })
 	res.status(200).send();
 }
@@ -352,9 +359,9 @@ function EmptyDocument(req, res) {
  * 
  * @param {http request} req 
  * @param {http responce} res
+ * 
  * Returns to client a json with the language 
  * backend is written with. 
- * 
  */
 function About(req, res) {
 	res.set('Content-Type', 'application/json');
@@ -363,32 +370,69 @@ function About(req, res) {
 
 /**
  * 
- * @param {http.request} req 
- * @param {http.responce} res
+ * @param {http request} 	req 
+ * @param {http responce} 	res
+ * 
  * Receives a JSon representing a request to update 
  * pad 
  */
 function Edit(req, res) {
-	console.log(req.body);
+	res.setHeader('Content-Type', 'application/json');
+
 	var saved = model_request.new_req(req.body.Pad_ID,
 		req.body.Value,
 		req.body.Start,
 		req.body.End,
-		req.body.Req_date,
-		req.body.is_update);
+		new Date(req.body.Req_Date * 1000),
+		req.body.Is_update_request);
 
 	if (saved === null) {
 		res.status(400).send();
-		return
+		return;
 	}
 
-	console.log('Received:\n\t' + util.inspect(req.body));
-	console.log('Saved: ' + util.inspect(saved));
 
 	res.status(202);
 	res.send();
 }
 
+/**
+ * Starts the function that checks for saved
+ * requests and makes the according update
+ * 
+ */
+function StartServing() {
+	const serve = () => {
+		// possible need for sorting here
+		Requests.sort(model_request.byDate)
+
+		for (i in Requests) {
+			var pad = PadMap[v.pad_id];
+
+			if (pad != null) {
+				if (!pad.Do_update(Requests[i].value,
+					Requests[i].start, Requests[i].end)) {
+					// possible error handling
+				}
+
+				// no race conditions for requests array 
+				// since nodejs runs on a single thread
+			} else {
+				console.log('Unable to find pad:' + Requests[i].pad_id);
+
+				// possible error handling
+
+			}
+
+			// Remove element from the array
+			Requests.splice(i, 1);
+		} // end-of for-in loop
+
+	};	// end-of serve function 
+
+	// star serving requests every 4s
+	setInterval(serve, 4000);
+};
 
 module.exports = {
 

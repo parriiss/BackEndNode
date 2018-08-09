@@ -6,12 +6,13 @@ const check = require('../CheckError');
  * 
  * @param {string} pad_id               The id of the pad request is for Not null
  * @param {string} value                The value of the update that is requested Not null
- * @param {string} date                 When the request was send
+ * @param {object} date                 Date object of when the request was send
  * @param {number} start                Position that we start replacing chars from pad
  * @param {number} end                  Position that we end replacing chars in pad
  * @param {boolean} Is_update_request   Boolean that signals it is a special edit req that
  *                                       asks if anything has changed
  * 
+ * @returns {object}
  * Returns an object that represents the request that
  * was received for pad editting
  */
@@ -23,16 +24,37 @@ function Req_info(pad_id , value , start, end, date , Is_update_request){
     }else if( !check.val_ok(start, 'number', 'Invalid start for request')){
 
     }
-    var new_Date = new Date(date);
-    if(new_Date === null){
+    if(date === null){
         console.trace('Invalid date of request');
         return;
     }
 
-    return {pad_id , value , start, end , new_Date , Is_update_request};
+    return {pad_id , value , start, end , date , Is_update_request};
+}
+
+
+/**
+ * 
+ * @param   {Date object} a First element of comparison 
+ * @param   {Date object} b Second element of comparison
+ * 
+ * @returns {number} 
+ *  Negative (a is before b) / Positive (a is before b) / Zero ( a equals b)
+ */
+function CompareBYTimeStamp(a , b){
+    switch(a.date < b.date){
+        case true:
+            return 0;
+        case false:
+            return -1;
+        default:
+            return 0; 
+    }
 }
 
 
 module.exports = {
-    new_req : Req_info
+    new_req     : Req_info,
+    Requests    : Requests,
+    byDate      : CompareBYTimeStamp
 };
