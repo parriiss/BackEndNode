@@ -48,10 +48,6 @@ function LoadPad(req, res) {
 
 }
 
-
-/*
-
-*/
 /**
  * 	Creating a new Pad and add it in the PadMap and in the DataBase
  *	Response <----- JSON with id,name,value,NeedFlush,Update
@@ -113,7 +109,7 @@ function CreateNewPad(req, res) {
 	}
 
 	//LOGGEDINUSERS IP's
-	user.AddUser(new_id,ip);
+	user.AddUser(new_id, ip);
 	console.log(PadMap.get(new_id).name);
 	res.status(200);
 	res.send(JSON.stringify(obj));
@@ -240,7 +236,7 @@ function update_filename_at_DB(db, padId, newName) {
 	}
 	var recPath = "./" + pad_obj.id + "-Backup" + ".txt";
 	var originalPath = "./SavedFiles/" + pad_obj.id + ".txt";
-var	result = CreateBackupFile(originalPath, recPath);
+	var result = CreateBackupFile(originalPath, recPath);
 	if (result === null) {
 		res.status(500).send();
 		return;
@@ -348,7 +344,7 @@ function EmptyDocument(req, res) {
 		return;
 	}
 	var originalPath = "./SavedFiles/" + pad_obj.id + ".txt";
-	fs.truncate(originalPath, 0, function(){console.log('Truncation of the file <'+originalPath+'> done')})
+	fs.truncate(originalPath, 0, function () { console.log('Truncation of the file <' + originalPath + '> done') })
 	res.status(200).send();
 }
 
