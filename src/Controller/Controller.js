@@ -103,7 +103,7 @@ function CreateNewPad(req, res) {
 	db.end();
 	if (result === null) {
 		PadMap.delete(new_id);
-		fs.unlink(fie_path, function (err) {
+		fs.unlink(file_path, function (err) {
 			if (err) { res.status(500).send(); return; }
 			console.log('File deleted!');
 		});
